@@ -1,0 +1,85 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "pl.jermey.clean_boilerplate"
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(':domain')
+    implementation project(':injector')
+
+    def appDependencies = rootProject.ext.appDependencies
+    def appTestDependencies = rootProject.ext.appTestDependencies
+
+    implementation appDependencies.kotlin
+    implementation appDependencies.rxKotlin
+    implementation appDependencies.androidAnnotations
+    implementation appDependencies.appCompatV7
+    implementation appDependencies.supportRecyclerView
+    implementation appDependencies.supportDesign
+    implementation appDependencies.timber
+    implementation appDependencies.rxAndroid
+    implementation appDependencies.glide
+    implementation appDependencies.koin
+    implementation appDependencies.koinArch
+    implementation appDependencies.koinScope
+    kapt appDependencies.archCompiler
+
+    testImplementation appTestDependencies.kotlinJUnit
+    androidTestImplementation appTestDependencies.archCoreTest
+    androidTestImplementation(appTestDependencies.koinTest, {
+        exclude group: 'org.jetbrains.kotlin'
+        exclude group: 'org.mockito'
+    })
+    testImplementation appTestDependencies.mockito
+
+    // Instrumentation test dependencies
+    androidTestImplementation appTestDependencies.junit
+    androidTestImplementation(appTestDependencies.mockito, {
+        exclude group: 'org.jetbrains.kotlin'
+        exclude group: 'org.mockito'
+    })
+    androidTestImplementation appTestDependencies.mockitoAndroid
+    androidTestImplementation(appTestDependencies.espressoCore) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.androidRunner) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.androidRules) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.espressoIntents) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.espressoContrib) {
+        exclude module: 'appcompat'
+        exclude module: 'appcompat-v7'
+        exclude module: 'support-v4'
+        exclude module: 'support-v13'
+        exclude module: 'support-annotations'
+        exclude module: 'recyclerview-v7'
+        exclude module: 'design'
+    }
+
+}
