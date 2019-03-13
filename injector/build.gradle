@@ -31,7 +31,9 @@ dependencies {
     implementation project(':domain')
     implementation project(':data')
 
-    implementation appDependencies.koin
-    implementation appDependencies.koinArch
-    implementation appDependencies.koinScope
+    def injectorDependencies = rootProject.ext.injectorDependencies
+
+    implementation injectorDependencies.koin
+    implementation injectorDependencies.koinArch
+    implementation injectorDependencies.koinScope
 }

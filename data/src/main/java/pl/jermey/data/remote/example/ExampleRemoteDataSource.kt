@@ -26,7 +26,7 @@ class ExampleRemoteDataSource(
     }
 
     override fun isCached(): Single<Boolean> {
-        throw NotImplementedError()
+        return Single.just<Boolean>(false)
     }
 
     override fun setLastCacheTime(lastCache: Long) {

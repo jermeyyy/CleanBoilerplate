@@ -79,6 +79,12 @@ ext {
             androidRules   : "com.android.support.test:rules:${runnerVersion}"
     ]
 
+    injectorDependencies = [
+            koin     : "org.koin:koin-android:${koinVersion}",
+            koinArch : "org.koin:koin-android-viewmodel:${koinVersion}",
+            koinScope: "org.koin:koin-android-scope:${koinVersion}"
+    ]
+
     domainDependencies = [
             rxKotlin: "io.reactivex.rxjava2:rxkotlin:${rxKotlinVersion}",
             kotlin  : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${kotlinVersion}"

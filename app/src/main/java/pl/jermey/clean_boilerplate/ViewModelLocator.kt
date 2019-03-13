@@ -16,4 +16,4 @@ fun ModuleDefinition.submodules(vararg modules: Module) {
 }
 
 val example = module { viewModel { ExampleViewModel(get()) } }
-val example2 = module { viewModel { ExampleViewModel2() } }
+val example2 = module { viewModel { ExampleViewModel2(get()) } }

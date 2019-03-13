@@ -5,10 +5,10 @@ apply plugin: 'kotlin-kapt'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    def appDependencies = rootProject.ext.appDependencies
+    def domainDependencies = rootProject.ext.domainDependencies
 
-    implementation appDependencies.kotlin
-    implementation appDependencies.rxKotlin
+    implementation domainDependencies.kotlin
+    implementation domainDependencies.rxKotlin
 }
 
 sourceCompatibility = "7"
