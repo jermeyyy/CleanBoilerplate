@@ -36,6 +36,13 @@ dependencies {
 
     implementation appDependencies.kotlin
     implementation appDependencies.rxKotlin
+    implementation appDependencies.ankoCommons
+    implementation appDependencies.ankoSdk
+    implementation appDependencies.ankoAppCompat
+    implementation appDependencies.ankoRecyclerView
+    implementation appDependencies.ankoConstraintLayout
+    implementation appDependencies.kBinding
+    implementation appDependencies.kBindingAnko
     implementation appDependencies.androidAnnotations
     implementation appDependencies.appCompatV7
     implementation appDependencies.supportRecyclerView
