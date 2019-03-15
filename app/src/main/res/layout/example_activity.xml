@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <import type="pl.jermey.clean_boilerplate.viewmodel.ExampleViewModelKt" />
+
+        <variable
+            name="viewModel"
+            type="pl.jermey.clean_boilerplate.viewmodel.ExampleViewModel" />
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{ExampleViewModelKt.data(viewModel.state)}"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{ExampleViewModelKt.errorMessage(viewModel.state)}"/>
+
+    </LinearLayout>
+
+</layout>

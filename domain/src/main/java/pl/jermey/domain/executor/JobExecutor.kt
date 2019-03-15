@@ -10,14 +10,13 @@ import java.util.concurrent.TimeUnit
  */
 open class JobExecutor : ThreadExecutor {
 
-    private val workQueue: LinkedBlockingQueue<Runnable>
+    private val workQueue: LinkedBlockingQueue<Runnable> = LinkedBlockingQueue()
 
     private val threadPoolExecutor: ThreadPoolExecutor
 
     private val threadFactory: ThreadFactory
 
     init {
-        this.workQueue = LinkedBlockingQueue()
         this.threadFactory = JobThreadFactory()
         this.threadPoolExecutor = ThreadPoolExecutor(
             INITIAL_POOL_SIZE, MAX_POOL_SIZE,
@@ -39,7 +38,7 @@ open class JobExecutor : ThreadExecutor {
         }
 
         companion object {
-            private val THREAD_NAME = "android_"
+            private const val THREAD_NAME = "android_"
         }
     }
 

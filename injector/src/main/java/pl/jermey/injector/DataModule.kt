@@ -1,7 +1,7 @@
 package pl.jermey.injector
 
-import org.buffer.android.boilerplate.data.source.ExampleDataSource
-import org.buffer.android.boilerplate.data.source.ExampleDataSourceFactory
+import pl.jermey.domain.source.ExampleDataSource
+import pl.jermey.domain.source.ExampleDataSourceFactory
 import org.koin.dsl.module.module
 import pl.jermey.data.remote.example.ExampleRemoteDataSource
 import pl.jermey.data.remote.example.ExampleService
@@ -16,7 +16,7 @@ val dataModule = module {
     single {
         createWebService<ExampleService>(
             get(),
-            "http://example.com/",
+            "https://jsonplaceholder.typicode.com/",
             get("gsonConverter")
         )
     }

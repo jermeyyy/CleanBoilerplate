@@ -3,10 +3,10 @@ package pl.jermey.data.remote.example
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
-import org.buffer.android.boilerplate.data.source.ExampleDataSource
+import pl.jermey.domain.source.ExampleDataSource
 import pl.jermey.data.remote.example.mapper.ExampleDataMapper
 import pl.jermey.data.remote.example.request.ExampleRequest
-import pl.jermey.domain.model.example.ExampleModel
+import pl.jermey.domain.model.example.Post
 
 class ExampleRemoteDataSource(
     private val exampleService: ExampleService,
@@ -17,11 +17,11 @@ class ExampleRemoteDataSource(
         throw NotImplementedError()
     }
 
-    override fun saveExampleData(data: List<ExampleModel>): Completable {
+    override fun saveExampleData(data: List<Post>): Completable {
         return exampleService.saveData(ExampleRequest(data))
     }
 
-    override fun getExampleData(): Flowable<List<ExampleModel>> {
+    override fun getExampleData(): Flowable<List<Post>> {
         return exampleService.getData().map { exampleDataMapper.mapFromRemote(it) }
     }
 

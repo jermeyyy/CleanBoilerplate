@@ -1,7 +1,5 @@
 package pl.jermey.data.remote.example.response
 
-import pl.jermey.domain.model.example.ExampleModel
+import pl.jermey.domain.model.example.Post
 
-data class ExampleResponse(val data:List<ExampleModel>) {
-
-}
+class ExampleResponse: ArrayList<Post>()
