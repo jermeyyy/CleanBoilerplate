@@ -1,12 +1,17 @@
 package pl.jermey.clean_boilerplate.viewmodel
 
+import androidx.lifecycle.LiveData
+import pl.jermey.clean_boilerplate.viewmodel.ExampleViewModel.ExampleState.*
 import pl.jermey.domain.model.example.Post
 import pl.jermey.domain.usecase.GetExampleDataUseCase
 
 class ExampleViewModel(
         private val getExampleDataUseCase: GetExampleDataUseCase
-) : StatefulViewModel<ExampleViewModel.ExampleState, ExampleViewModel.ExampleAction>(ExampleState.Loading) {
+) : StatefulViewModel<ExampleViewModel.ExampleState, ExampleViewModel.ExampleAction>(Loading) {
 
+    val data: LiveData<String> = state.bind<DataLoaded, String> { state -> state?.data?.toString() }
+    val error: LiveData<String> = state.bind<Error, String> { state -> state?.throwable?.toString() }
+    val loading: LiveData<Boolean> = state.bind<Loading, Boolean> { state -> state != null }
 
     override fun dispatchAction(action: ExampleAction) {
         when (action) {
@@ -19,10 +24,10 @@ class ExampleViewModel(
         
     }
 
-    fun getData() = launch {
+    private fun getData() = launch {
         getExampleDataUseCase.execute().subscribe(
-                { data -> state.postValue(ExampleState.DataLoaded(data)) },
-                { error -> state.postValue(ExampleState.Error(error)) }
+                { data -> state.postValue(DataLoaded(data)) },
+                { error -> state.postValue(Error(error)) }
         )
     }
 
@@ -38,10 +43,3 @@ class ExampleViewModel(
     }
 
 }
-
-fun ExampleViewModel.ExampleState.errorMessage(): String =
-        (this as? ExampleViewModel.ExampleState.Error)?.throwable?.message ?: ""
-
-
-fun ExampleViewModel.ExampleState.data(): String =
-        (this as? ExampleViewModel.ExampleState.DataLoaded)?.data?.toString() ?: ""

@@ -9,6 +9,7 @@ dependencies {
 
     implementation domainDependencies.kotlin
     implementation domainDependencies.rxKotlin
+    implementation domainDependencies.rxJava
 }
 
 sourceCompatibility = "7"

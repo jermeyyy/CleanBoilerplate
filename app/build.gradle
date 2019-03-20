@@ -36,6 +36,7 @@ dependencies {
 
     implementation appDependencies.kotlin
     implementation appDependencies.rxKotlin
+    implementation appDependencies.rxAndroid
     implementation appDependencies.ankoCommons
     implementation appDependencies.ankoSdk
     implementation appDependencies.ankoAppCompat
@@ -48,8 +49,8 @@ dependencies {
     implementation appDependencies.supportRecyclerView
     implementation appDependencies.supportDesign
     implementation appDependencies.timber
-    implementation appDependencies.rxAndroid
     implementation appDependencies.glide
+    implementation appDependencies.fastAdapter
     implementation appDependencies.koin
     implementation appDependencies.koinArch
     implementation appDependencies.koinScope

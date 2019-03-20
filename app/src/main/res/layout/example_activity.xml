@@ -3,7 +3,7 @@
 
     <data>
 
-        <import type="pl.jermey.clean_boilerplate.viewmodel.ExampleViewModelKt" />
+        <import type="android.view.View" />
 
         <variable
             name="viewModel"
@@ -11,20 +11,29 @@
 
     </data>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{ExampleViewModelKt.data(viewModel.state)}"/>
+            android:layout_centerInParent="true"
+            android:text="@{viewModel.data}" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{ExampleViewModelKt.errorMessage(viewModel.state)}"/>
+            android:layout_centerInParent="true"
+            android:text="@{viewModel.error}" />
 
-    </LinearLayout>
+        <ProgressBar
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerInParent="true"
+            android:indeterminate="true"
+            android:visibility="@{viewModel.loading ? View.VISIBLE : View.GONE}" />
+
+    </RelativeLayout>
 
 </layout>

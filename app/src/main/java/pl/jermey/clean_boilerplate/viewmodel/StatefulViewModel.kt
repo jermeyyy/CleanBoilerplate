@@ -1,7 +1,9 @@
 package pl.jermey.clean_boilerplate.viewmodel
 
 import androidx.annotation.CallSuper
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -13,7 +15,7 @@ abstract class StatefulViewModel<STATE : State, ACTION : Action>(initialState: S
 
     private val disposables = CompositeDisposable()
 
-    val state = MutableLiveData<STATE>()
+    protected val state = MutableLiveData<STATE>()
 
     init {
         state.postValue(initialState)
@@ -33,6 +35,13 @@ abstract class StatefulViewModel<STATE : State, ACTION : Action>(initialState: S
     override fun onCleared() {
         super.onCleared()
         disposables.clear()
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    inline fun <reified STATE : State, VALUE> MutableLiveData<*>.bind(noinline transformer: (state: STATE?) -> VALUE?): LiveData<VALUE> {
+        return Transformations.map<Any, VALUE>(this as LiveData<Any>) {
+            transformer(if (value is STATE) value as STATE else null)
+        }
     }
 
 }
