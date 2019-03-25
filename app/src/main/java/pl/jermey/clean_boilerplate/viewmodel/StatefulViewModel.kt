@@ -7,16 +7,20 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import pl.jermey.clean_boilerplate.util.StateMachine
+import kotlin.properties.Delegates
 import kotlin.reflect.KClass
 
 interface State
-interface Action
+interface Event
 
-abstract class StatefulViewModel<STATE : State, ACTION : Action>(initialState: STATE) : ViewModel() {
+abstract class StatefulViewModel<STATE : State, EVENT : Event>(val initialState: STATE) : ViewModel() {
 
     private val disposables = CompositeDisposable()
 
     protected val state = MutableLiveData<STATE>()
+
+    abstract val stateMachine: StateMachine<STATE, EVENT, Nothing>
 
     init {
         state.postValue(initialState)
@@ -26,11 +30,9 @@ abstract class StatefulViewModel<STATE : State, ACTION : Action>(initialState: S
         disposables.add(job())
     }
 
-    fun invokeAction(action: ACTION) {
-        dispatchAction(action)
+    fun invokeAction(action: EVENT) {
+        stateMachine.transition(action)
     }
-
-    protected abstract fun dispatchAction(action: ACTION)
 
     @CallSuper
     override fun onCleared() {
@@ -38,7 +40,7 @@ abstract class StatefulViewModel<STATE : State, ACTION : Action>(initialState: S
         disposables.clear()
     }
 
-    inline fun <reified STATE1 : STATE, VALUE> MutableLiveData<STATE>.bind(
+    inline fun <reified STATE1 : STATE, VALUE> MutableLiveData<STATE>.bindState(
         noinline transformer: (state: STATE1?) -> VALUE?
     ): LiveData<VALUE> {
         return Transformations.map<STATE, VALUE>(this as LiveData<STATE>) {
@@ -46,23 +48,24 @@ abstract class StatefulViewModel<STATE : State, ACTION : Action>(initialState: S
         }
     }
 
-    fun <VALUE> MutableLiveData<STATE>.bindings(block: Binder<STATE, VALUE>.() -> FullBuilder<STATE, VALUE>) =
+    fun <VALUE> MutableLiveData<STATE>.bind(block: Binder<STATE, VALUE>.() -> BinderBuilder<STATE, VALUE>) =
         Binder<STATE, VALUE>(this).let(block).build()
 
-    inner class Binder<S : STATE, VALUE>(private val liveData: LiveData<S>) {
+    @Suppress("unused")
+    inner class Binder<BINDING_STATE : STATE, VALUE>(private val liveData: LiveData<BINDING_STATE>) {
 
         val transformers: MutableMap<KClass<*>, Function1<*, VALUE>> = mutableMapOf()
 
-        inline fun <reified STATE1 : S> bind(noinline transformer: Function1<STATE1, VALUE>) {
-            if (transformers[STATE1::class] != null) throw RuntimeException("Should not override already present key")
-            transformers[STATE1::class] = transformer
+        inline fun <reified S : BINDING_STATE> Binder<BINDING_STATE, VALUE>.state(noinline transformer: Function1<S, VALUE>) {
+            if (transformers[S::class] != null) throw RuntimeException("Should not override already present key")
+            transformers[S::class] = transformer
         }
 
-        fun default(transformer: Function0<VALUE?>): FullBuilder<S, VALUE> =
-            FullBuilder(liveData, transformers, transformer)
+        fun Binder<BINDING_STATE, VALUE>.default(transformer: Function0<VALUE?>): BinderBuilder<BINDING_STATE, VALUE> =
+            BinderBuilder(liveData, transformers, transformer)
     }
 
-    inner class FullBuilder<S : STATE, VALUE>(
+    inner class BinderBuilder<S : STATE, VALUE>(
         private val liveData: LiveData<S>,
         private val transformers: MutableMap<KClass<*>, Function1<*, VALUE>>,
         private val defaultTransformer: Function0<VALUE?>
@@ -72,9 +75,7 @@ abstract class StatefulViewModel<STATE : State, ACTION : Action>(initialState: S
         fun build(): LiveData<VALUE> = Transformations
             .map<S, VALUE>(liveData) { s ->
                 val transformer = transformers.getOrElse(s::class) { null } as? Function1<S, VALUE>
-                transformer
-                    ?.invoke(s)
-                    ?: defaultTransformer.invoke()
+                transformer?.invoke(s) ?: defaultTransformer.invoke()
             }
     }
 }

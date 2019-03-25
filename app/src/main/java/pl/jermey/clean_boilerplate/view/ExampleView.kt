@@ -7,7 +7,7 @@ import org.koin.android.viewmodel.ext.android.viewModel
 import pl.jermey.clean_boilerplate.R
 import pl.jermey.clean_boilerplate.databinding.ExampleActivityBinding
 import pl.jermey.clean_boilerplate.viewmodel.ExampleViewModel
-import pl.jermey.clean_boilerplate.viewmodel.ExampleViewModel.ExampleAction.*
+import pl.jermey.clean_boilerplate.viewmodel.ExampleViewModel.ExampleEvent.Action.GetData
 
 class ExampleView : AppCompatActivity() {
 
