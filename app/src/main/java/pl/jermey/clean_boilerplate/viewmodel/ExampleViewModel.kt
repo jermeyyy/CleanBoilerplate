@@ -5,7 +5,6 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import pl.jermey.clean_boilerplate.util.StateMachine
 import pl.jermey.clean_boilerplate.viewmodel.ExampleViewModel.ExampleState.*
 import pl.jermey.domain.model.example.Post
 import pl.jermey.domain.usecase.GetExampleDataUseCase
@@ -22,11 +21,10 @@ class ExampleViewModel(
         default { "" }
     }
 
-    val error: LiveData<String> = state.bindState<Error, String> { state -> state?.throwable.toString() }
+    val error: LiveData<String> = state.bindState<Error, String> { state -> state?.throwable?.toString() }
     val loading: LiveData<Boolean> = state.bindState<Loading, Boolean> { state -> state != null }
 
-    override val stateMachine: StateMachine<ExampleState, ExampleEvent, Nothing> = StateMachine.create {
-        initialState(initialState)
+    override val stateGraph = stateGraph {
         state<ExampleState.Empty> {
             on<ExampleEvent.Action.GetData> {
                 getData()
@@ -48,9 +46,6 @@ class ExampleViewModel(
         }
         state<ExampleState.JustString> { }
         state<ExampleState.Error> { }
-        onValidTransition {
-            state.postValue(it.toState)
-        }
     }
 
     private fun postData(data: List<Post>) {
@@ -60,8 +55,8 @@ class ExampleViewModel(
     private fun getData() = launch {
         getExampleDataUseCase.execute()
             .subscribeBy(
-                onNext = { stateMachine.transition(ExampleEvent.OnDataLoaded(it)) },
-                onError = { stateMachine.transition(ExampleEvent.OnError(it)) }
+                onNext = { invokeAction(ExampleEvent.OnDataLoaded(it)) },
+                onError = { invokeAction(ExampleEvent.OnError(it)) }
             )
 
         // other data
@@ -70,8 +65,8 @@ class ExampleViewModel(
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onError = { stateMachine.transition(ExampleEvent.OnError(it)) },
-                onNext = { stateMachine.transition(ExampleEvent.OnStringLoaded(it)) }
+                onError = { invokeAction(ExampleEvent.OnError(it)) },
+                onNext = { invokeAction(ExampleEvent.OnStringLoaded(it)) }
             )
     }
 

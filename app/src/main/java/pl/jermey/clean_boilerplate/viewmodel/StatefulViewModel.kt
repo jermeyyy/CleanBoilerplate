@@ -8,22 +8,38 @@ import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import pl.jermey.clean_boilerplate.util.StateMachine
-import kotlin.properties.Delegates
 import kotlin.reflect.KClass
 
 interface State
 interface Event
 
-abstract class StatefulViewModel<STATE : State, EVENT : Event>(val initialState: STATE) : ViewModel() {
+@Suppress("unused")
+abstract class StatefulViewModel<STATE : State, EVENT : Event>(private val initialState: STATE) : ViewModel() {
+
+    private var stateMachine: StateMachine<STATE, EVENT, Nothing>? = null
 
     private val disposables = CompositeDisposable()
 
     protected val state = MutableLiveData<STATE>()
 
-    abstract val stateMachine: StateMachine<STATE, EVENT, Nothing>
+    abstract val stateGraph: StateMachine.Graph<STATE, EVENT, Nothing>
 
     init {
         state.postValue(initialState)
+    }
+
+    fun StatefulViewModel<STATE, EVENT>.stateGraph(
+        init: StateMachine.GraphBuilder<STATE, EVENT, Nothing>.() -> Unit
+    ): StateMachine.Graph<STATE, EVENT, Nothing> {
+        val graph =
+            StateMachine.GraphBuilder<STATE, EVENT, Nothing>(null)
+                .apply { initialState(initialState) }
+                .apply(init)
+                .build()
+        stateMachine = StateMachine.create(graph) {
+            onValidTransition { transition -> state.postValue(transition.toState) }
+        }
+        return graph
     }
 
     fun launch(job: () -> Disposable) {
@@ -31,7 +47,7 @@ abstract class StatefulViewModel<STATE : State, EVENT : Event>(val initialState:
     }
 
     fun invokeAction(action: EVENT) {
-        stateMachine.transition(action)
+        stateMachine?.transition(action)
     }
 
     @CallSuper
@@ -51,7 +67,6 @@ abstract class StatefulViewModel<STATE : State, EVENT : Event>(val initialState:
     fun <VALUE> MutableLiveData<STATE>.bind(block: Binder<STATE, VALUE>.() -> BinderBuilder<STATE, VALUE>) =
         Binder<STATE, VALUE>(this).let(block).build()
 
-    @Suppress("unused")
     inner class Binder<BINDING_STATE : STATE, VALUE>(private val liveData: LiveData<BINDING_STATE>) {
 
         val transformers: MutableMap<KClass<*>, Function1<*, VALUE>> = mutableMapOf()

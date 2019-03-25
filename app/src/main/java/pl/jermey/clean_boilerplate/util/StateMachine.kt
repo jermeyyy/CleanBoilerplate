@@ -234,7 +234,7 @@ class StateMachine<STATE : Any, EVENT : Any, SIDE_EFFECT : Any> private construc
             return create(null, init)
         }
 
-        private fun <STATE : Any, EVENT : Any, SIDE_EFFECT : Any> create(
+        fun <STATE : Any, EVENT : Any, SIDE_EFFECT : Any> create(
             graph: Graph<STATE, EVENT, SIDE_EFFECT>?,
             init: GraphBuilder<STATE, EVENT, SIDE_EFFECT>.() -> Unit
         ): StateMachine<STATE, EVENT, SIDE_EFFECT> {
