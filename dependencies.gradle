@@ -19,7 +19,7 @@ ext {
     supportDesignLibraryVersion = '1.0.0-rc01'
     timberVersion = '4.5.1'
     glideVersion = '4.0.0'
-    koinVersion = '1.0.2'
+    koinVersion = '2.0.0-rc-1'
     glassfishAnnotationVersion = '10.0-b28'
     fastAdapterVersion = '4.0.0-rc03'
 
@@ -41,8 +41,8 @@ ext {
 
     appDependencies = [
             koin                     : "org.koin:koin-android:${koinVersion}",
-            koinArch                 : "org.koin:koin-android-viewmodel:${koinVersion}",
-            koinScope                : "org.koin:koin-android-scope:${koinVersion}",
+            koinArch                 : "org.koin:koin-androidx-viewmodel:${koinVersion}",
+            koinScope                : "org.koin:koin-androidx-scope:${koinVersion}",
             rxJava                   : "io.reactivex.rxjava2:rxjava:${rxJavaVersion}",
             rxKotlin                 : "io.reactivex.rxjava2:rxkotlin:${rxKotlinVersion}",
             rxAndroid                : "io.reactivex.rxjava2:rxandroid:${rxAndroidVersion}",
@@ -80,8 +80,8 @@ ext {
 
     injectorDependencies = [
             koin     : "org.koin:koin-android:${koinVersion}",
-            koinArch : "org.koin:koin-android-viewmodel:${koinVersion}",
-            koinScope: "org.koin:koin-android-scope:${koinVersion}"
+            koinArch : "org.koin:koin-androidx-viewmodel:${koinVersion}",
+            koinScope: "org.koin:koin-androidx-scope:${koinVersion}",
     ]
 
     domainDependencies = [
