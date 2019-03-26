@@ -1,5 +1,4 @@
-package pl.jermey.clean_boilerplate
-
+package pl.jermey.data
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -10,7 +9,7 @@ import org.junit.runner.RunWith
 /**
  * Instrumented test, which will execute on an Android device.
  *
- * See [testing documentation](http://d.android.com/tools/testing).
+ * @see [Testing documentation](http://d.android.com/tools/testing)
  */
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
@@ -18,6 +17,7 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("pl.jermey.clean_boilerplate", appContext.packageName)
+
+        assertEquals("pl.jermey.data.test", appContext.packageName)
     }
 }

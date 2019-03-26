@@ -13,7 +13,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -47,4 +47,16 @@ dependencies {
     testImplementation dataTestDependencies.kotlinJUnit
     testImplementation dataTestDependencies.mockito
     testImplementation dataTestDependencies.assertj
+    androidTestImplementation(appTestDependencies.androidXTestRunner) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.androidXTestRules) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.androidXTestMonitor) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.androidXTestExt) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
 }

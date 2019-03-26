@@ -37,14 +37,7 @@ dependencies {
     implementation appDependencies.kotlin
     implementation appDependencies.rxKotlin
     implementation appDependencies.rxAndroid
-    implementation appDependencies.ankoCommons
-    implementation appDependencies.ankoSdk
-    implementation appDependencies.ankoAppCompat
-    implementation appDependencies.ankoRecyclerView
-    implementation appDependencies.ankoConstraintLayout
-    implementation appDependencies.kBinding
-    implementation appDependencies.kBindingAnko
-    implementation appDependencies.androidAnnotations
+    implementation appDependencies.androidSupportAnnotations
     implementation appDependencies.appCompatV7
     implementation appDependencies.supportRecyclerView
     implementation appDependencies.supportDesign
@@ -74,10 +67,16 @@ dependencies {
     androidTestImplementation(appTestDependencies.espressoCore) {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
-    androidTestImplementation(appTestDependencies.androidRunner) {
+    androidTestImplementation(appTestDependencies.androidXTestRunner) {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
-    androidTestImplementation(appTestDependencies.androidRules) {
+    androidTestImplementation(appTestDependencies.androidXTestRules) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.androidXTestMonitor) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.androidXTestExt) {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
     androidTestImplementation(appTestDependencies.espressoIntents) {

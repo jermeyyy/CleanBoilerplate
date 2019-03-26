@@ -12,7 +12,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -32,8 +32,22 @@ dependencies {
     implementation project(':data')
 
     def injectorDependencies = rootProject.ext.injectorDependencies
+    def appTestDependencies = rootProject.ext.appTestDependencies
 
     implementation injectorDependencies.koin
     implementation injectorDependencies.koinArch
     implementation injectorDependencies.koinScope
+    androidTestImplementation appTestDependencies.junit
+    androidTestImplementation(appTestDependencies.androidXTestRunner) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.androidXTestRules) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.androidXTestMonitor) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestImplementation(appTestDependencies.androidXTestExt) {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
 }
