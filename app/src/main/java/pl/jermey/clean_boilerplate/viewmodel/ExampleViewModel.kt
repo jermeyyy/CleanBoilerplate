@@ -1,10 +1,7 @@
 package pl.jermey.clean_boilerplate.viewmodel
 
 import androidx.lifecycle.LiveData
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.schedulers.Schedulers
 import pl.jermey.clean_boilerplate.viewmodel.ExampleViewModel.ExampleState.*
 import pl.jermey.domain.model.example.Post
 import pl.jermey.domain.usecase.GetExampleDataUseCase
@@ -16,9 +13,12 @@ class ExampleViewModel(
 
     val data: LiveData<String> = state.bind {
         state<JustString> { state -> state.data }
-        state<DataLoaded> { state -> state.data.toString() }
         state<Loading> { "Loading data" }
         default { "" }
+    }
+    val items: LiveData<List<Post>> = state.bind {
+        state<DataLoaded> { it.data }
+        default { emptyList() }
     }
 
     val error: LiveData<String> = state.bindState<Error, String> { state -> state?.throwable?.toString() }
@@ -43,6 +43,7 @@ class ExampleViewModel(
             on<ExampleEvent.OnStringLoaded> {
                 transitionTo(JustString(it.data))
             }
+            on<ExampleEvent.OnDataLoaded> { transitionTo(DataLoaded(it.data)) }
         }
         state<ExampleState.JustString> { }
         state<ExampleState.Error> { }
@@ -58,16 +59,25 @@ class ExampleViewModel(
                 onNext = { invokeAction(ExampleEvent.OnDataLoaded(it)) },
                 onError = { invokeAction(ExampleEvent.OnError(it)) }
             )
+        getExampleDataUseCase.execute()
+            .delay(5, TimeUnit.SECONDS)
+            .flatMapIterable { l -> l }
+            .take(3)
+            .toList()
+            .subscribeBy(
+                onSuccess = { invokeAction(ExampleEvent.OnDataLoaded(it)) },
+                onError = { invokeAction(ExampleEvent.OnError(it)) }
+            )
 
         // other data
-        Observable.just("Hello")
-            .delay(5, TimeUnit.SECONDS)
-            .subscribeOn(Schedulers.newThread())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-                onError = { invokeAction(ExampleEvent.OnError(it)) },
-                onNext = { invokeAction(ExampleEvent.OnStringLoaded(it)) }
-            )
+//        Observable.just("Hello")
+//            .delay(5, TimeUnit.SECONDS)
+//            .subscribeOn(Schedulers.newThread())
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribeBy(
+//                onError = { invokeAction(ExampleEvent.OnError(it)) },
+//                onNext = { invokeAction(ExampleEvent.OnStringLoaded(it)) }
+//            )
     }
 
     sealed class ExampleState : State {

@@ -17,7 +17,7 @@ ext {
     androidXVersion = '1.0.0'
     roomVersion = '2.0.0-rc01'
     supportDesignLibraryVersion = '1.0.0-rc01'
-    timberVersion = '4.5.1'
+    timberVersion = '4.7.1'
     glideVersion = '4.0.0'
     koinVersion = '2.0.0-rc-1'
     glassfishAnnotationVersion = '10.0-b28'
@@ -58,7 +58,8 @@ ext {
             roomCompiler             : "androidx.room:room-compiler:${roomVersion}",
             roomRxJava               : "androidx.room:room-rxjava2:${roomVersion}",
             archCompiler             : "androidx.lifecycle:lifecycle-compiler:${roomVersion}",
-            fastAdapter              : "com.mikepenz:fastadapter:${fastAdapterVersion}"
+            fastAdapter              : "com.mikepenz:fastadapter:${fastAdapterVersion}",
+            fastAdapterDiff    : "com.mikepenz:fastadapter-extensions-diff:${fastAdapterVersion}"
     ]
 
     appTestDependencies = [
