@@ -59,15 +59,15 @@ class ExampleViewModel(
                 onNext = { invokeAction(ExampleEvent.OnDataLoaded(it)) },
                 onError = { invokeAction(ExampleEvent.OnError(it)) }
             )
-        getExampleDataUseCase.execute()
-            .delay(5, TimeUnit.SECONDS)
-            .flatMapIterable { l -> l }
-            .take(3)
-            .toList()
-            .subscribeBy(
-                onSuccess = { invokeAction(ExampleEvent.OnDataLoaded(it)) },
-                onError = { invokeAction(ExampleEvent.OnError(it)) }
-            )
+//        getExampleDataUseCase.execute()
+//            .delay(5, TimeUnit.SECONDS)
+//            .flatMapIterable { l -> l }
+//            .take(3)
+//            .toList()
+//            .subscribeBy(
+//                onSuccess = { invokeAction(ExampleEvent.OnDataLoaded(it)) },
+//                onError = { invokeAction(ExampleEvent.OnError(it)) }
+//            )
 
         // other data
 //        Observable.just("Hello")

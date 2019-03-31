@@ -17,8 +17,8 @@ class PostItem(model: Post) :
     override fun bindView(holder: PostViewHolder, payloads: MutableList<Any>) {
         super.bindView(holder, payloads)
         holder.binding.model = model
+        holder.binding.radio.isChecked = isSelected
     }
-
     override var identifier: Long = model.id
 
     class PostViewHolder(itemView: View) : BindingHolder<PostItemBinding>(itemView)
