@@ -1,7 +1,9 @@
 package pl.jermey.clean_boilerplate.view
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.biometric.BiometricPrompt
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,6 +21,7 @@ import pl.jermey.clean_boilerplate.viewmodel.ExampleViewModel
 import pl.jermey.clean_boilerplate.viewmodel.ExampleViewModel.ExampleEvent.Action.GetData
 import pl.jermey.domain.model.example.Post
 import timber.log.Timber
+import java.util.concurrent.Executors
 
 
 class ExampleView : AppCompatActivity() {
@@ -59,3 +62,4 @@ class ExampleView : AppCompatActivity() {
         })
     }
 }
+

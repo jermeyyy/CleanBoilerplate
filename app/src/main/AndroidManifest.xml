@@ -14,7 +14,7 @@
                  tools:ignore="GoogleAppIndexingWarning">
 
 
-        <activity android:name=".view.ExampleView">
+        <activity android:name=".view.FingerprintView">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
