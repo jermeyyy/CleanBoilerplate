@@ -30,13 +30,6 @@
             android:layout_margin="16dp"
             android:text="Auth" />
 
-        <Button
-            android:id="@+id/test"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="Test" />
-
     </LinearLayout>
 
 </layout>

@@ -4,8 +4,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties.*
-import android.security.keystore.UserNotAuthenticatedException
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -37,27 +37,6 @@ class FingerprintView : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.fingerprint_view)
         binding.auth.setOnClickListener { auth() }
         binding.setup.setOnClickListener { setup() }
-        binding.test.setOnClickListener {
-            try {
-                test()
-            } catch (e: UserNotAuthenticatedException) {
-                Toast.makeText(this@FingerprintView, "Fail: UserNotAuthenticatedException", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun test() {
-        val cipher = Cipher.getInstance("$KEY_ALGORITHM_AES/$BLOCK_MODE_CBC/$ENCRYPTION_PADDING_PKCS7")
-        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey())
-        val bytes = cipher.doFinal("Hello cipher!".toByteArray())
-
-        Handler(mainLooper).post {
-            Toast.makeText(
-                this@FingerprintView,
-                "Success:\nbytes:${bytes?.contentToString()}\niv:${cipher.iv?.contentToString()}",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
     }
 
     private fun auth() {
@@ -73,7 +52,16 @@ class FingerprintView : AppCompatActivity() {
 
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 super.onAuthenticationSucceeded(result)
-                test()
+                val cipher = result.cryptoObject!!.cipher!!
+                val bytes = cipher.doFinal("Hello finger cipher!".toByteArray())
+
+                Handler(mainLooper).post {
+                    Toast.makeText(
+                        this@FingerprintView,
+                        "Success:\nbytes:${bytes?.contentToString()}\niv:${cipher.iv?.contentToString()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
 
             override fun onAuthenticationFailed() {
@@ -84,14 +72,20 @@ class FingerprintView : AppCompatActivity() {
             }
         })
 
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Set the title to display.")
-            .setSubtitle("Set the subtitle to display.")
-            .setDescription("Set the description to display")
-            .setNegativeButtonText("Negative Button")
-            .build()
+        val cipher = Cipher.getInstance("$KEY_ALGORITHM_AES/$BLOCK_MODE_CBC/$ENCRYPTION_PADDING_PKCS7")
+        try {
+            cipher.init(Cipher.ENCRYPT_MODE, getSecretKey())
+            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Set the title to display.")
+                .setSubtitle("Set the subtitle to display.")
+                .setDescription("Set the description to display")
+                .setNegativeButtonText("Negative Button")
+                .build()
 
-        biometricPrompt.authenticate(promptInfo)
+            biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
+        } catch (e: KeyPermanentlyInvalidatedException) {
+            Toast.makeText(this, "Invalid key, new fingerprint enrolled or system biometric changed, press setup again", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun setup() {
@@ -140,7 +134,7 @@ class FingerprintView : AppCompatActivity() {
                     setKeySize(256)
                     setBlockModes(BLOCK_MODE_CBC)
                     setUserAuthenticationRequired(true)
-                    setUserAuthenticationValidityDurationSeconds(2)
+                    setUserAuthenticationValidityDurationSeconds(-1) // default, now biometricPrompt.authenticate needs CryptoObject as second param
                     setEncryptionPaddings(ENCRYPTION_PADDING_PKCS7)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         setInvalidatedByBiometricEnrollment(true)
