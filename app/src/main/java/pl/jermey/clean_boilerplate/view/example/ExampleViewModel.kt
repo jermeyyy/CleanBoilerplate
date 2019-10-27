@@ -1,21 +1,29 @@
-package pl.jermey.clean_boilerplate.viewmodel
+package pl.jermey.clean_boilerplate.view.example
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.SavedStateHandle
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import pl.jermey.clean_boilerplate.util.Event
-import pl.jermey.clean_boilerplate.util.State
-import pl.jermey.clean_boilerplate.viewmodel.ExampleViewModel.ExampleState.*
-import pl.jermey.domain.model.example.Post
+import kotlinx.android.parcel.Parcelize
+import pl.jermey.clean_boilerplate.util.viewmodel.Event
+import pl.jermey.clean_boilerplate.util.viewmodel.SingleLiveEvent
+import pl.jermey.clean_boilerplate.util.viewmodel.State
+import pl.jermey.clean_boilerplate.util.viewmodel.StatefulViewModel
+import pl.jermey.clean_boilerplate.view.example.ExampleViewModel.ExampleState.*
+import pl.jermey.clean_boilerplate.view.example.model.Post
 import pl.jermey.domain.usecase.GetExampleDataUseCase
 import java.util.concurrent.TimeUnit
 
 class ExampleViewModel(
   private val getExampleDataUseCase: GetExampleDataUseCase,
-  private val initialState: ExampleState = Empty
-) : StatefulViewModel<ExampleViewModel.ExampleState, ExampleViewModel.ExampleEvent>(initialState) {
+  initialState: ExampleState = Empty,
+  savedStateHandle: SavedStateHandle
+) : StatefulViewModel<ExampleViewModel.ExampleState, ExampleViewModel.ExampleEvent>(
+  initialState,
+  savedStateHandle
+) {
 
   val data: LiveData<String> = state.bind {
     instance<JustString> { state -> state.data }
@@ -27,6 +35,8 @@ class ExampleViewModel(
   val error: LiveData<String> =
     state.bindState<Error, String> { state -> state?.throwable?.toString() }
   val loading: LiveData<Boolean> = state.bindState<Loading, Boolean> { state -> state != null }
+
+  val event = SingleLiveEvent<String>()
 
   override val stateGraph = stateGraph {
     state<Empty> {
@@ -48,7 +58,11 @@ class ExampleViewModel(
         transitionTo(JustString(it.data))
       }
     }
-    state<JustString> { }
+    state<JustString> {
+      onEnter {
+        event.postValue(data)
+      }
+    }
     state<Error> { }
   }
 
@@ -59,8 +73,13 @@ class ExampleViewModel(
   private fun getData() = launch {
     getExampleDataUseCase.execute()
       .subscribeBy(
-        onNext = { invokeAction(ExampleEvent.OnDataLoaded(it)) },
-        onError = { invokeAction(ExampleEvent.OnError(it)) }
+        onNext = { data ->
+          val posts = data.map { Post(it.userId, it.id, it.title, it.body) }
+          invokeAction(ExampleEvent.OnDataLoaded(posts))
+        },
+        onError = { error ->
+          invokeAction(ExampleEvent.OnError(error))
+        }
       )
 
     // other data
@@ -69,16 +88,29 @@ class ExampleViewModel(
       .subscribeOn(Schedulers.newThread())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
-        onError = { invokeAction(ExampleEvent.OnError(it)) },
-        onNext = { invokeAction(ExampleEvent.OnStringLoaded(it)) }
+        onError = { error ->
+          invokeAction(ExampleEvent.OnError(error))
+        },
+        onNext = { data ->
+          invokeAction(ExampleEvent.OnStringLoaded(data))
+        }
       )
   }
 
   sealed class ExampleState : State {
+    @Parcelize
     object Empty : ExampleState()
+
+    @Parcelize
     object Loading : ExampleState()
+
+    @Parcelize
     data class JustString(val data: String) : ExampleState()
+
+    @Parcelize
     data class DataLoaded(val data: List<Post>) : ExampleState()
+
+    @Parcelize
     data class Error(val throwable: Throwable) : ExampleState()
   }
 

@@ -23,6 +23,7 @@ ext {
     koinVersion = '2.1.0-alpha-1'
     glassfishAnnotationVersion = '10.0-b28'
     fastAdapterVersion = '4.0.0-rc03'
+    archSavedStateVersion = '1.0.0-alpha01'
 
     //Testing
     robolectricVersion = '3.4.2'
@@ -59,6 +60,7 @@ ext {
             roomCompiler             : "androidx.room:room-compiler:${roomVersion}",
             roomRxJava               : "androidx.room:room-rxjava2:${roomVersion}",
             archCompiler             : "androidx.lifecycle:lifecycle-compiler:${roomVersion}",
+            archSavedState           : "androidx.lifecycle:lifecycle-viewmodel-savedstate:${archSavedStateVersion}",
             fastAdapter              : "com.mikepenz:fastadapter:${fastAdapterVersion}"
     ]
 

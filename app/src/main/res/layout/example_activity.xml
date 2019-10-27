@@ -7,7 +7,7 @@
 
         <variable
                 name="viewModel"
-                type="pl.jermey.clean_boilerplate.viewmodel.ExampleViewModel"/>
+                type="pl.jermey.clean_boilerplate.view.example.ExampleViewModel"/>
 
     </data>
 

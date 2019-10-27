@@ -25,6 +25,10 @@ android {
     }
 }
 
+androidExtensions {
+    experimental = true
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -47,6 +51,7 @@ dependencies {
     implementation appDependencies.koin
     implementation appDependencies.koinArch
     implementation appDependencies.koinScope
+    implementation appDependencies.archSavedState
     kapt appDependencies.archCompiler
 
     testImplementation appTestDependencies.kotlinJUnit

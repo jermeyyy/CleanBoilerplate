@@ -6,7 +6,7 @@ import io.reactivex.Single
 import pl.jermey.domain.source.ExampleDataSource
 import pl.jermey.data.remote.example.mapper.ExampleDataMapper
 import pl.jermey.data.remote.example.request.ExampleRequest
-import pl.jermey.domain.model.example.Post
+import pl.jermey.domain.model.example.PostData
 
 class ExampleRemoteDataSource(
     private val exampleService: ExampleService,
@@ -17,11 +17,11 @@ class ExampleRemoteDataSource(
         throw NotImplementedError()
     }
 
-    override fun saveExampleData(data: List<Post>): Completable {
+    override fun saveExampleData(data: List<PostData>): Completable {
         return exampleService.saveData(ExampleRequest(data))
     }
 
-    override fun getExampleData(): Flowable<List<Post>> {
+    override fun getExampleData(): Flowable<List<PostData>> {
         return exampleService.getData().map { exampleDataMapper.mapFromRemote(it) }
     }
 
