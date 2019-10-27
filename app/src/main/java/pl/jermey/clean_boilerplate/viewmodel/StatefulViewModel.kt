@@ -1,96 +1,94 @@
 package pl.jermey.clean_boilerplate.viewmodel
 
-import androidx.annotation.CallSuper
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
+import pl.jermey.clean_boilerplate.util.Event
+import pl.jermey.clean_boilerplate.util.State
 import pl.jermey.clean_boilerplate.util.StateMachine
 import kotlin.reflect.KClass
 
-interface State
-interface Event
+abstract class StatefulViewModel<STATE : State, EVENT : Event>(private val initialState: STATE) : AbstractViewModel() {
 
-@Suppress("unused")
-abstract class StatefulViewModel<STATE : State, EVENT : Event>(private val initialState: STATE) : ViewModel() {
+    private var stateMachine: StateMachine<STATE, EVENT>? = null
 
-    private var stateMachine: StateMachine<STATE, EVENT, Nothing>? = null
+    private val _state = MutableLiveData<STATE>()
+    protected val state: LiveData<STATE> = _state
 
-    private val disposables = CompositeDisposable()
-
-    protected val state = MutableLiveData<STATE>()
-
-    abstract val stateGraph: StateMachine.Graph<STATE, EVENT, Nothing>
+    abstract val stateGraph: StateMachine.Graph<STATE, EVENT>
 
     init {
-        state.postValue(initialState)
+        _state.postValue(initialState)
     }
 
     fun StatefulViewModel<STATE, EVENT>.stateGraph(
-        init: StateMachine.GraphBuilder<STATE, EVENT, Nothing>.() -> Unit
-    ): StateMachine.Graph<STATE, EVENT, Nothing> {
+        init: StateMachine.GraphBuilder<STATE, EVENT>.() -> Unit
+    ): StateMachine.Graph<STATE, EVENT> {
         val graph =
-            StateMachine.GraphBuilder<STATE, EVENT, Nothing>(null)
+            StateMachine.GraphBuilder<STATE, EVENT>(null)
                 .apply { initialState(initialState) }
                 .apply(init)
                 .build()
         stateMachine = StateMachine.create(graph) {
-            onValidTransition { transition -> state.postValue(transition.toState) }
+            onValidTransition { transition ->
+                if (transition.toState != _state.value)
+                    _state.postValue(transition.toState)
+            }
         }
         return graph
-    }
-
-    fun launch(job: () -> Disposable) {
-        disposables.add(job())
     }
 
     fun invokeAction(action: EVENT) {
         stateMachine?.transition(action)
     }
 
-    @CallSuper
-    override fun onCleared() {
-        super.onCleared()
-        disposables.clear()
-    }
-
-    inline fun <reified STATE1 : STATE, VALUE> MutableLiveData<STATE>.bindState(
+    inline fun <reified STATE1 : STATE, VALUE> LiveData<STATE>.bindState(
         noinline transformer: (state: STATE1?) -> VALUE?
     ): LiveData<VALUE> {
-        return Transformations.map<STATE, VALUE>(this as LiveData<STATE>) {
+        return Transformations.map<STATE, VALUE>(this) {
             transformer(if (value is STATE1) value as STATE1 else null)
         }
     }
 
-    fun <VALUE> MutableLiveData<STATE>.bind(block: Binder<STATE, VALUE>.() -> BinderBuilder<STATE, VALUE>) =
-        Binder<STATE, VALUE>(this).let(block).build()
+    protected fun <S : Any, VALUE> LiveData<S>.bind(block: Binder<S, VALUE>.() -> BinderBuilder<S, VALUE>) =
+        Binder<S, VALUE>(this).let(block).build()
 
-    inner class Binder<BINDING_STATE : STATE, VALUE>(private val liveData: LiveData<BINDING_STATE>) {
+    protected inner class Binder<K : Any, VALUE>(private val liveData: LiveData<K>) {
 
         val transformers: MutableMap<KClass<*>, Function1<*, VALUE>> = mutableMapOf()
 
-        inline fun <reified S : BINDING_STATE> Binder<BINDING_STATE, VALUE>.state(noinline transformer: Function1<S, VALUE>) {
+        inline fun <reified S : K> instance(noinline transformer: Function1<S, VALUE>) {
             if (transformers[S::class] != null) throw RuntimeException("Should not override already present key")
             transformers[S::class] = transformer
         }
 
-        fun Binder<BINDING_STATE, VALUE>.default(transformer: Function0<VALUE?>): BinderBuilder<BINDING_STATE, VALUE> =
+        fun default(transformer: Function0<VALUE?>): BinderBuilder<K, VALUE> =
             BinderBuilder(liveData, transformers, transformer)
+
+        fun ignoreUndefined() = BinderBuilder(liveData, transformers)
     }
 
-    inner class BinderBuilder<S : STATE, VALUE>(
+    protected inner class BinderBuilder<S : Any, VALUE>(
         private val liveData: LiveData<S>,
-        private val transformers: MutableMap<KClass<*>, Function1<*, VALUE>>,
-        private val defaultTransformer: Function0<VALUE?>
+        private val transformers: Map<KClass<*>, Function1<*, VALUE>>,
+        private val defaultTransformer: Function0<VALUE?>? = null
     ) {
 
         @Suppress("UNCHECKED_CAST")
         fun build(): LiveData<VALUE> = Transformations
             .map<S, VALUE>(liveData) { s ->
                 val transformer = transformers.getOrElse(s::class) { null } as? Function1<S, VALUE>
-                transformer?.invoke(s) ?: defaultTransformer.invoke()
+                transformer
+                    ?.invoke(s)
+                    ?: defaultTransformer?.invoke()
             }
+            .filter { (defaultTransformer == null && it != null) || defaultTransformer != null }
+    }
+
+    private fun <T> LiveData<T>.filter(predicate: (T) -> Boolean): LiveData<T> {
+        val mediator = MediatorLiveData<T>()
+        mediator.addSource(this) { t -> if (predicate(t)) mediator.postValue(t) }
+        return mediator
     }
 }

@@ -1,6 +1,7 @@
 allprojects {
     repositories {
         jcenter()
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -19,7 +20,7 @@ ext {
     supportDesignLibraryVersion = '1.0.0-rc01'
     timberVersion = '4.5.1'
     glideVersion = '4.0.0'
-    koinVersion = '2.0.0-rc-1'
+    koinVersion = '2.1.0-alpha-1'
     glassfishAnnotationVersion = '10.0-b28'
     fastAdapterVersion = '4.0.0-rc03'
 
@@ -81,7 +82,7 @@ ext {
     injectorDependencies = [
             koin     : "org.koin:koin-android:${koinVersion}",
             koinArch : "org.koin:koin-androidx-viewmodel:${koinVersion}",
-            koinScope: "org.koin:koin-androidx-scope:${koinVersion}",
+            koinScope: "org.koin:koin-androidx-scope:${koinVersion}"
     ]
 
     domainDependencies = [
