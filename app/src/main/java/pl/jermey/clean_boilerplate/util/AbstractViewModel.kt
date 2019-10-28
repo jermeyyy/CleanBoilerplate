@@ -1,4 +1,4 @@
-package pl.jermey.clean_boilerplate.util.viewmodel
+package pl.jermey.clean_boilerplate.util
 
 import androidx.annotation.CallSuper
 import androidx.lifecycle.ViewModel

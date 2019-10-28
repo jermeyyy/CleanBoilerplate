@@ -1,4 +1,4 @@
-package pl.jermey.clean_boilerplate.util.viewmodel
+package pl.jermey.clean_boilerplate.util.state
 
 /*
  *  Copyright 2017 Google Inc.

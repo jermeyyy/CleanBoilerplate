@@ -1,15 +1,20 @@
-package pl.jermey.clean_boilerplate.util.viewmodel
+package pl.jermey.clean_boilerplate.util.state
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.Transformations
+import pl.jermey.clean_boilerplate.util.AbstractViewModel
+import pl.jermey.clean_boilerplate.util.filter
 import kotlin.reflect.KClass
 
 abstract class StatefulViewModel<STATE : State, EVENT : Event>(
   private val initialState: STATE,
-  private val savedState: SavedStateHandle
+  val handle: SavedStateHandle? = null
 ) : AbstractViewModel() {
 
   companion object {
-    private const val STATE_KEY = "savedState"
+    private const val STATE_KEY = "STATE_KEY"
   }
 
   private var stateMachine: StateMachine<STATE, EVENT>? = null
@@ -20,24 +25,23 @@ abstract class StatefulViewModel<STATE : State, EVENT : Event>(
   abstract val stateGraph: StateMachine.Graph<STATE, EVENT>
 
   init {
-    if (savedState.contains(STATE_KEY)) {
-      _state.postValue(savedState.get(STATE_KEY))
-    } else {
-      _state.postValue(initialState)
-    }
+    val state = handle?.get<STATE>(STATE_KEY) ?: initialState
+    _state.postValue(state)
   }
 
   fun StatefulViewModel<STATE, EVENT>.stateGraph(
-    init: StateMachine.GraphBuilder<STATE, EVENT>.() -> Unit
+    graphDefinition: StateMachine.GraphBuilder<STATE, EVENT>.() -> Unit
   ): StateMachine.Graph<STATE, EVENT> {
     val graph =
       StateMachine.GraphBuilder<STATE, EVENT>(null)
-        .apply { initialState(initialState) }
-        .apply(init)
+        .apply {
+          initialState(handle?.get<STATE>(STATE_KEY) ?: initialState)
+          graphDefinition()
+        }
         .build()
     stateMachine = StateMachine.create(graph) {
       onValidTransition { transition ->
-        savedState.set(STATE_KEY, transition.toState)
+        handle?.set(STATE_KEY, transition.toState)
         if (transition.toState != _state.value) {
           _state.postValue(transition.toState)
         }
@@ -50,11 +54,11 @@ abstract class StatefulViewModel<STATE : State, EVENT : Event>(
     stateMachine?.transition(action)
   }
 
-  inline fun <reified STATE1 : STATE, VALUE> LiveData<STATE>.bindState(
-    noinline transformer: (state: STATE1?) -> VALUE?
+  inline fun <reified S : STATE, VALUE> LiveData<STATE>.bindState(
+    noinline transformer: (state: S?) -> VALUE?
   ): LiveData<VALUE> {
     return Transformations.map<STATE, VALUE>(this) {
-      transformer(if (value is STATE1) value as STATE1 else null)
+      transformer(if (value is S) value as S else null)
     }
   }
 
@@ -91,11 +95,5 @@ abstract class StatefulViewModel<STATE : State, EVENT : Event>(
           ?: defaultTransformer?.invoke()
       }
       .filter { (defaultTransformer == null && it != null) || defaultTransformer != null }
-  }
-
-  private fun <T> LiveData<T>.filter(predicate: (T) -> Boolean): LiveData<T> {
-    val mediator = MediatorLiveData<T>()
-    mediator.addSource(this) { t -> if (predicate(t)) mediator.postValue(t) }
-    return mediator
   }
 }

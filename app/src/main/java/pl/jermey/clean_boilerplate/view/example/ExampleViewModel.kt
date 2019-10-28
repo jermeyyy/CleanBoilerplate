@@ -1,16 +1,14 @@
 package pl.jermey.clean_boilerplate.view.example
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.parcel.Parcelize
-import pl.jermey.clean_boilerplate.util.viewmodel.Event
-import pl.jermey.clean_boilerplate.util.viewmodel.SingleLiveEvent
-import pl.jermey.clean_boilerplate.util.viewmodel.State
-import pl.jermey.clean_boilerplate.util.viewmodel.StatefulViewModel
+import pl.jermey.clean_boilerplate.util.state.*
 import pl.jermey.clean_boilerplate.view.example.ExampleViewModel.ExampleState.*
 import pl.jermey.clean_boilerplate.view.example.model.Post
 import pl.jermey.domain.usecase.GetExampleDataUseCase
@@ -25,6 +23,10 @@ class ExampleViewModel(
   savedStateHandle
 ) {
 
+  companion object {
+    const val SOME_DATA_KEY = "someData"
+  }
+
   val data: LiveData<String> = state.bind {
     instance<JustString> { state -> state.data }
     instance<DataLoaded> { state -> state.data.toString() }
@@ -38,11 +40,15 @@ class ExampleViewModel(
 
   val event = SingleLiveEvent<String>()
 
+  val someData: MutableLiveData<String> by SavedStateDelegate(SOME_DATA_KEY)
+
   override val stateGraph = stateGraph {
+    globalEvents {
+      on<ExampleEvent.OnError> { dontTransition() }
+    }
     state<Empty> {
       on<ExampleEvent.Action.GetData> {
-        getData()
-        transitionTo(Loading)
+        transitionTo(Loading, SideEffect.of { getData() })
       }
     }
     state<Loading> {
@@ -123,6 +129,7 @@ class ExampleViewModel(
     internal data class OnDataLoaded(val data: List<Post>) : ExampleEvent()
     internal data class OnStringLoaded(val data: String) : ExampleEvent()
     internal data class OnError(val error: Throwable) : ExampleEvent()
+    internal data class NowPlayingLoadingSuccess(val data: String) : ExampleEvent()
   }
 
 }

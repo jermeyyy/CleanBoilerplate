@@ -5,10 +5,8 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.definition.BeanDefinition
 import org.koin.core.definition.Definition
 import org.koin.core.module.Module
-import org.koin.core.parameter.DefinitionParameters
-import org.koin.core.scope.Scope
 import org.koin.dsl.module
-import pl.jermey.clean_boilerplate.util.viewmodel.StatefulViewModel
+import pl.jermey.clean_boilerplate.util.state.StatefulViewModel
 import pl.jermey.clean_boilerplate.view.example.ExampleViewModel
 
 
